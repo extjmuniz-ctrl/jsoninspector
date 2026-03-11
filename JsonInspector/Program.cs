@@ -64,21 +64,51 @@ namespace JsonInspector
 
                     try
                     {
-                        var dashboard = JsonSerializer.Deserialize<Dashboard>(json, options);
+                        var jsonTrimmed = json.TrimStart();
 
-                        if (dashboard != null)
+                        if (jsonTrimmed.StartsWith("["))
                         {
-                            dashboards.Add(new DashboardFileInfo
+                            var dashboardList = JsonSerializer.Deserialize<List<Dashboard>>(json, options);
+
+                            if (dashboardList != null && dashboardList.Count > 0)
                             {
-                                Dashboard = dashboard,
-                                FileName = Path.GetFileName(file),
-                                FullPath = file,
-                                ContieneTextoCompleto = contieneTextoCompleto
-                            });
+                                foreach (var dashboard in dashboardList)
+                                {
+                                    if (dashboard != null)
+                                    {
+                                        dashboards.Add(new DashboardFileInfo
+                                        {
+                                            Dashboard = dashboard,
+                                            FileName = Path.GetFileName(file),
+                                            FullPath = file,
+                                            ContieneTextoCompleto = contieneTextoCompleto
+                                        });
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                erroresDeserializacion.Add($"{Path.GetFileName(file)} -> Lista de dashboards vacía o null.");
+                            }
                         }
                         else
                         {
-                            erroresDeserializacion.Add($"{Path.GetFileName(file)} -> Deserialización devolvió null.");
+                            var dashboard = JsonSerializer.Deserialize<Dashboard>(json, options);
+
+                            if (dashboard != null)
+                            {
+                                dashboards.Add(new DashboardFileInfo
+                                {
+                                    Dashboard = dashboard,
+                                    FileName = Path.GetFileName(file),
+                                    FullPath = file,
+                                    ContieneTextoCompleto = contieneTextoCompleto
+                                });
+                            }
+                            else
+                            {
+                                erroresDeserializacion.Add($"{Path.GetFileName(file)} -> Deserialización devolvió null.");
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -109,7 +139,8 @@ namespace JsonInspector
             Console.WriteLine("Detección flexible adicional:");
             Console.WriteLine($"  - nombre original: {spBaseName}");
             Console.WriteLine($"  - nombre normalizado(con guin bajo, con comillas, se eliminan espacios, etc): {NormalizeLoose(spBaseName)}");
-            
+            Console.WriteLine(new string('-', 100));
+
             var hallazgos = new List<HallazgoSp>();
 
             foreach (var item in dashboards)
