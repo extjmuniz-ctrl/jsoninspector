@@ -11,6 +11,7 @@ namespace JsonInspector.Models
         public int DashboardNum { get; set; }
         public string DashboardName { get; set; } = string.Empty;
         public string Archivo { get; set; } = string.Empty;
+        public string FullPath { get; set; } = string.Empty;
         public int DataProviderId { get; set; }
         public string DataProviderName { get; set; } = string.Empty;
         public List<Coincidencia> Coincidencias { get; set; } = new();
